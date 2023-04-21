@@ -1,8 +1,7 @@
 package hello.core.scope;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Scope;
 
@@ -36,7 +35,7 @@ public class SingletonWithPrototypeTest1 {
 
         ClientBean clientBean2 = ac.getBean(ClientBean.class);
         int count2 = clientBean2.logic();
-        assertThat(count2).isEqualTo(2);
+        assertThat(count2).isEqualTo(1);
 
         assertThat(clientBean1).isSameAs(clientBean2);
     }
@@ -45,14 +44,14 @@ public class SingletonWithPrototypeTest1 {
     @Scope("singleton")  // 기본값
     static class ClientBean {
 
-        private final PrototypeBean prototypeBean;
+        private ObjectProvider<PrototypeBean> prototypeBeanProvider;
 
-        @Autowired  // 안 적어도 default 로 @Autowired 적용됨
-        public ClientBean(PrototypeBean prototypeBean) {
-            this.prototypeBean = prototypeBean;
+        public ClientBean(ObjectProvider<PrototypeBean> prototypeBeanProvider) {
+            this.prototypeBeanProvider = prototypeBeanProvider;
         }
 
         public int logic() {
+            PrototypeBean prototypeBean = prototypeBeanProvider.getObject();
             prototypeBean.addCount();
             int count = prototypeBean.getCount();
             return count;
